@@ -1,0 +1,9 @@
+# Ignore compressed image files
+*.xz
+
+# Ignore image files
+*.img
+
+# Ignore devicetree blob files
+*.dtb
+
