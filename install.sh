@@ -6,8 +6,10 @@
 ## Sanity checks for all dependencies
 ##
 
-[[ -f dist/*.xz ]] || exit_on_error "No Raspberry Pi OS compressed image found"
+ls dist/*.xz || exit_on_error "No Raspberry Pi OS compressed image found"
 which -s brew || exit_on_error "Please install the HomeBrew package manager from https://brew.sh"
+
+brew update && brew upgrade
 brew install qemu xz openssl@1.1
 
 pushd $(dirname $0)
