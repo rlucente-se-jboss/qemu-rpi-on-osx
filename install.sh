@@ -10,7 +10,7 @@ ls dist/*.xz || exit_on_error "No Raspberry Pi OS compressed image found"
 which -s brew || exit_on_error "Please install the HomeBrew package manager from https://brew.sh"
 
 brew update && brew upgrade
-brew install qemu xz openssl@1.1
+brew install qemu xz openssl
 
 pushd $(dirname $0)
 
@@ -28,18 +28,24 @@ IMAGE=dist/*.img
 ##
 
 VOLUME=$(hdiutil attach -imagekey diskimage-class=CRawDiskImage \
-    dist/*.img | grep Windows_FAT_32 | awk '{print $3}')
+    $IMAGE | grep Windows_FAT_32 | awk '{print $3}')
 
 rm -f *.dtb *.img
-cp $VOLUME/bcm2710-rpi-3-b-plus.dtb $VOLUME/kernel8.img .
+cp $VOLUME/$DTB_FILE $VOLUME/kernel8.img .
 
 ##
 ## Override user credentials
 ##
 
 cat > $VOLUME/userconf.txt <<EOF
-$USERNAME:$(/usr/local/opt/openssl/bin/openssl passwd -6 $PASSWORD)
+$USERNAME:$(/opt/homebrew/bin/openssl passwd -6 $PASSWORD)
 EOF
+
+##
+## Enable ssh
+##
+
+touch $VOLUME/ssh
 
 hdiutil detach $VOLUME
 
@@ -47,7 +53,7 @@ hdiutil detach $VOLUME
 ## Resize instance
 ##
 
-qemu-img resize -f raw dist/*.img $SD_CARD_SIZE
+qemu-img resize -f raw $IMAGE $SD_CARD_SIZE
 
 popd
 
